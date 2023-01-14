@@ -1,4 +1,4 @@
-name: glados-auto-checkin
+name: autockin
 
 on:
   workflow_dispatch: 
@@ -7,7 +7,7 @@ on:
   pull_request:
     branches: [ master ]
   schedule:
-    - cron:  0 19 * * * 
+    - cron:  0 20 * * * 
       # 
       # https://tool.lu/crontab/
       # https://datetime360.com/cn/utc-cst-china-time/

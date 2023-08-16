@@ -11,34 +11,60 @@ COOKIES = os.environ["COOKIES"]
 cookies=COOKIES.split('&&')
 
 
+# GlaDOS签到
+def checkin(cookie):
+    checkin_url= "https://glados.rocks/api/user/checkin"
+    state_url= "https://glados.rocks/api/user/status"
+    referer = 'https://glados.rocks/console/checkin'
+    origin = "https://glados.rocks"
+    useragent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36"
+    payload={
+        'token': 'glados.one'
+    }
+    try:
+        checkin = requests.post(checkin_url,headers={
+            'cookie': cookie ,
+            'referer': referer,
+            'origin':origin,
+            'user-agent':useragent,
+            'content-type':'application/json;charset=UTF-8'},data=json.dumps(payload))
+        state =  requests.get(state_url,headers={
+            'cookie': cookie ,
+            'referer': referer,
+            'origin':origin,
+            'user-agent':useragent})
+    except Exception as e:
+        print(f"签到失败，请检查网络：{e}")
+        return None, None, None
+    
+    try:
+        mess = checkin.json()['message']
+        mail = state.json()['data']['email']
+        time = state.json()['data']['leftDays'].split('.')[0]
+    except Exception as e:
+        print(f"解析登录结果失败：{e}")
+        return None, None, None
+    
+    return mess, time, mail
+
 
 def start():    
-    url= "https://glados.network/api/user/checkin"
-    url2= "https://glados.network/api/user/status"
-    referer = 'https://glados.network/console/checkin'
-    origin = "https://glados.network"
-    useragent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36 Edg/98.0.1108.56"
-    payload={
-        'token': 'glados.network'
-    }
+    contents = []
     for cookie in cookies:
-        checkin = requests.post(url,headers={'cookie': cookie ,'referer': referer,'origin':origin,'user-agent':useragent,'content-type':'application/json;charset=UTF-8'},data=json.dumps(payload))
-        state =  requests.get(url2,headers={'cookie': cookie ,'referer': referer,'origin':origin,'user-agent':useragent})
-    #--------------------------------------------------------------------------------------------------------#  
-        time = state.json()['data']['leftDays']
-        time = time.split('.')[0]
-        email = state.json()['data']['email']
-        if 'message' in checkin.text:
-            mess = checkin.json()['message']
-            if sever == 'on':
-                requests.get('http://www.pushplus.plus/send?token=' + sckey + '&title='+mess+'&content='+email+' 剩余'+time+'天')
-        else:
-            requests.get('http://www.pushplus.plus/send?token=' + sckey + '&content='+email+'更新cookie')
-     #--------------------------------------------------------------------------------------------------------#   
+        ret, remain, email = checkin(cookie)
+        if not ret:
+            continue
+
+        content = f"账号：{email}\n签到结果：{ret}\n剩余天数：{remain}\n"
+        print(content)
+        contents.append(content)
+
+    contents_str = "".join(contents)
+    return contents_str
 
 
 def main_handler(event, context):
-  return start()
+    return start()
 
 if __name__ == '__main__':
     start()

@@ -39,5 +39,3 @@ jobs:
           SERVE: ${{ secrets.SERVE }}
           SCKEY: ${{ secrets.SCKEY }}
           COOKIES: ${{ secrets.COOKIES }}
-      - uses: gautamkrishnar/workflow@master # using the workflow with default settings
-

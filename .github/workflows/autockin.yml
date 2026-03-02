@@ -7,7 +7,7 @@ on:
   pull_request:
     branches: [master]
   schedule:
-    - cron: 0 20 * * *
+    - cron: 0 1 * * *
       #
       # https://tool.lu/crontab/
       # https://datetime360.com/cn/utc-cst-china-time/
@@ -21,7 +21,7 @@ jobs:
     # https://p3terx.com/archives/github-actions-manual-trigger.html
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Install Python
         run: |
